@@ -1,12 +1,22 @@
 version: "3.7"
 
 services:
+  app_proxy:
+    environment:
+      APP_HOST: castor-traccar_traccar_1
+      APP_PORT: 8082
+
   traccar:
     image: traccar/traccar:latest
     restart: unless-stopped
+
+    # Puertos de trackers (además del acceso web por app_proxy)
     ports:
-      - "8082:8082"
       - "5013:5013"
       - "5013:5013/udp"
       - "5015:5015"
       - "5015:5015/udp"
+
+    volumes:
+      - ${APP_DATA_DIR}/data:/opt/traccar/data
+      - ${APP_DATA_DIR}/logs:/opt/traccar/logs
