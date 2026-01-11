@@ -1,15 +1,24 @@
+manifestVersion: 1
+
 id: castor-traccar
+category: utilities
 name: Traccar
 version: "1.0.0"
-category: Utilities
-port: 8082
+tagline: GPS tracking server
+description: >-
+  Servidor GPS Traccar para visualizar y gestionar dispositivos.
 
-description: Servidor GPS Traccar
 developer: Traccar
 website: https://www.traccar.org/
+repo: https://github.com/traccar/traccar
+support: https://www.traccar.org/forums/
+port: 8082
+path: ""
 
-compose:
-  file: docker-compose.yml
-
-services:
-  - traccar
+gallery: []
+releaseNotes: ""
+dependencies: []
+defaultUsername: ""
+defaultPassword: ""
+submitter: ""
+submission: ""
