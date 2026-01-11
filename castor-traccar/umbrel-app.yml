@@ -6,3 +6,6 @@ port: 8082
 description: "Servidor GPS Traccar"
 developer: "Traccar"
 website: "https://www.traccar.org/"
+
+services:
+  - traccar
