@@ -1,0 +1,20 @@
+manifestVersion: 1
+
+id: castor-openvpn
+category: networking
+name: OpenVPN Hub
+version: "0.1.0"
+tagline: OpenVPN TCP 443 hub with dual-exit profiles
+description: >
+  OpenVPN server for hostile networks (TCP 443) with backup-safe persistence.
+developer: Castor
+website: ""
+repo: ""
+support: ""
+port: 0
+path: ""
+gallery: []
+releaseNotes: ""
+dependencies: []
+defaultUsername: ""
+defaultPassword: ""
