@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-# Puerto OpenVPN TCP (443 libre en tu Umbrel)
-export OVPN_TCP_PORT="443"
+# Umbrel install context puede NO definir APP_DATA_DIR
+APP_DATA_DIR="${APP_DATA_DIR:-/home/umbrel/umbrel/app-data/castor-openvpn}"
 
-# Red interna del VPN (NO 10.8.0.0/xx). Elegimos 10.66.0.0/24.
+export OVPN_TCP_PORT="443"
 export OVPN_NET="10.66.0.0"
 export OVPN_MASK="255.255.255.0"
-
-# Persistencia: todo aquí se incluye en el backup de Umbrel
 export OVPN_DATA_DIR="${APP_DATA_DIR}/data"
-
