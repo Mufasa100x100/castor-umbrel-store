@@ -20,7 +20,7 @@ services:
       - ${APP_DATA_DIR}/web:/usr/share/nginx/html:ro
 
   openvpn:
-    image: kylemanna/openvpn:2.5
+    image: image: kylemanna/openvpn:latest
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
