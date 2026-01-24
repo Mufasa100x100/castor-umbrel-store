@@ -26,9 +26,19 @@ services:
       - "443:1194/tcp"
     volumes:
       - ${APP_DATA_DIR}/data:/etc/openvpn
-      - ./scripts:/opt/castor:ro
     environment:
       OVPN_TCP_PORT: "443"
-      OVPN_NET: "10.66.0.0"
-      OVPN_MASK: "255.255.255.0"
-    entrypoint: ["/bin/sh", "-lc", "exec /opt/castor/entrypoint.sh"]
+    command:
+      - /bin/sh
+      - -lc
+      - |
+          set -e
+          if [ ! -f /etc/openvpn/openvpn.conf ]; then
+            echo "[init] Initializing OpenVPN..."
+            ovpn_genconfig -u tcp://0.0.0.0:1194 -n 1.1.1.1 -n 8.8.8.8
+            echo "castor" | ovpn_initpki nopass
+            echo "[init] Done"
+          else
+            echo "[init] Using existing config"
+          fi
+          exec ovpn_run
