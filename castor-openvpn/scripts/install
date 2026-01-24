@@ -1,37 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Este script lo ejecuta Umbrel durante "install"
-# Normalmente ya está dentro de /home/umbrel/umbrel/app-data/<app-id>/scripts/install
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DATA_DIR="${APP_DIR}/data"
 
 mkdir -p "${DATA_DIR}"
 
-# Si ya existe config, no re-inicializamos (esto es clave para restore)
-if [ -f "${DATA_DIR}/openvpn.conf" ]; then
-  echo "[install] OpenVPN ya inicializado. No se hace nada."
-  exit 0
-fi
-
-# IP local como default (válida para LAN). Para acceso remoto usarás DDNS/tu IP pública en el .ovpn si hace falta.
+# IP local por defecto (válida LAN). En cliente podrás usar tu DDNS/IP pública si procede.
 LAN_IP="$(hostname -I | awk '{print $1}')"
-if [ -z "${LAN_IP}" ]; then
-  LAN_IP="127.0.0.1"
+[ -n "${LAN_IP}" ] || LAN_IP="127.0.0.1"
+
+# 1) Generar config si falta ovpn_env.sh (es lo que ovpn_run intenta sourcear)
+if [ ! -f "${DATA_DIR}/ovpn_env.sh" ]; then
+  echo "[install] Generating OpenVPN server config..."
+  docker run --rm \
+    -v "${DATA_DIR}:/etc/openvpn" \
+    kylemanna/openvpn \
+    ovpn_genconfig -u "tcp://${LAN_IP}:443" -n 1.1.1.1 -n 8.8.8.8
+else
+  echo "[install] ovpn_env.sh exists, skipping genconfig."
 fi
 
-echo "[install] Inicializando OpenVPN en ${DATA_DIR} (primera vez)..."
-echo "[install] Server URL tcp://${LAN_IP}:443"
+# 2) Inicializar PKI si falta
+if [ ! -d "${DATA_DIR}/pki" ]; then
+  echo "[install] Initializing PKI..."
+  docker run --rm \
+    -e EASYRSA_BATCH=1 \
+    -v "${DATA_DIR}:/etc/openvpn" \
+    kylemanna/openvpn \
+    ovpn_initpki nopass
+else
+  echo "[install] PKI exists, skipping initpki."
+fi
 
-docker run --rm \
-  -v "${DATA_DIR}:/etc/openvpn" \
-  kylemanna/openvpn \
-  ovpn_genconfig -u "tcp://${LAN_IP}:443" -n 1.1.1.1 -n 8.8.8.8
-
-docker run --rm \
-  -e EASYRSA_BATCH=1 \
-  -v "${DATA_DIR}:/etc/openvpn" \
-  kylemanna/openvpn \
-  ovpn_initpki nopass
-
-echo "[install] Inicialización completada."
+echo "[install] OK"
