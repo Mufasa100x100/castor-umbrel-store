@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Este script lo ejecuta Umbrel durante "install"
+# Normalmente ya está dentro de /home/umbrel/umbrel/app-data/<app-id>/scripts/install
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DATA_DIR="${APP_DIR}/data"
+
+mkdir -p "${DATA_DIR}"
+
+# Si ya existe config, no re-inicializamos (esto es clave para restore)
+if [ -f "${DATA_DIR}/openvpn.conf" ]; then
+  echo "[install] OpenVPN ya inicializado. No se hace nada."
+  exit 0
+fi
+
+# IP local como default (válida para LAN). Para acceso remoto usarás DDNS/tu IP pública en el .ovpn si hace falta.
+LAN_IP="$(hostname -I | awk '{print $1}')"
+if [ -z "${LAN_IP}" ]; then
+  LAN_IP="127.0.0.1"
+fi
+
+echo "[install] Inicializando OpenVPN en ${DATA_DIR} (primera vez)..."
+echo "[install] Server URL tcp://${LAN_IP}:443"
+
+docker run --rm \
+  -v "${DATA_DIR}:/etc/openvpn" \
+  kylemanna/openvpn \
+  ovpn_genconfig -u "tcp://${LAN_IP}:443" -n 1.1.1.1 -n 8.8.8.8
+
+docker run --rm \
+  -e EASYRSA_BATCH=1 \
+  -v "${DATA_DIR}:/etc/openvpn" \
+  kylemanna/openvpn \
+  ovpn_initpki nopass
+
+echo "[install] Inicialización completada."
