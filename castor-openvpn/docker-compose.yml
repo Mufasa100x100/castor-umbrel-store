@@ -17,7 +17,7 @@ services:
     volumes:
       - ${APP_DATA_DIR}/web:/usr/share/nginx/html:ro
 
-    openvpn:
+  openvpn:
     image: kylemanna/openvpn:latest
     restart: unless-stopped
     cap_add:
@@ -26,7 +26,3 @@ services:
       - "443:1194/tcp"
     volumes:
       - ${APP_DATA_DIR}/data:/etc/openvpn
-    environment:
-      EASYRSA_BATCH: "1"
-    entrypoint: ["/bin/sh", "-lc"]
-    command: "if [ ! -f /etc/openvpn/openvpn.conf ]; then echo '[init] Initializing OpenVPN...'; ovpn_genconfig -u tcp://0.0.0.0:1194 -n 1.1.1.1 -n 8.8.8.8; echo 'castor' | ovpn_initpki nopass; echo '[init] Done'; else echo '[init] Using existing config'; fi; exec ovpn_run"
