@@ -12,10 +12,11 @@ const dataDir = path.join(appDir, "data");
 
 fs.mkdirSync(dataDir, { recursive: true });
 
-// IP local (LAN)
 let lanIp = "127.0.0.1";
 try {
-  const out = execSync("hostname -I | awk '{print $1}'", { shell: "/bin/bash" }).toString().trim();
+  const out = execSync("hostname -I | awk '{print $1}'", { shell: "/bin/bash" })
+    .toString()
+    .trim();
   if (out) lanIp = out;
 } catch {}
 
@@ -23,15 +24,17 @@ const ovpnEnv = path.join(dataDir, "ovpn_env.sh");
 const pkiDir = path.join(dataDir, "pki");
 
 if (!fs.existsSync(ovpnEnv)) {
-  sh(`docker run --rm -v "${dataDir}:/etc/openvpn" kylemanna/openvpn ovpn_genconfig -u "tcp://${lanIp}:443" -n 1.1.1.1 -n 8.8.8.8`);
-} else {
-  console.log("[install] ovpn_env.sh exists, skipping genconfig");
+  sh(
+    `docker run --rm -v "${dataDir}:/etc/openvpn" kylemanna/openvpn ` +
+    `ovpn_genconfig -u "tcp://${lanIp}:443" -n 1.1.1.1 -n 8.8.8.8`
+  );
 }
 
 if (!fs.existsSync(pkiDir)) {
-  sh(`docker run --rm -e EASYRSA_BATCH=1 -v "${dataDir}:/etc/openvpn" kylemanna/openvpn ovpn_initpki nopass`);
-} else {
-  console.log("[install] PKI exists, skipping initpki");
+  sh(
+    `docker run --rm -e EASYRSA_BATCH=1 ` +
+    `-v "${dataDir}:/etc/openvpn" kylemanna/openvpn ovpn_initpki nopass`
+  );
 }
 
-console.log("[install] OK");
+console.log("[install] OpenVPN ready");
