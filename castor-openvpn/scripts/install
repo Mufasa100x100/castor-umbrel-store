@@ -1,17 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
+APP_DIR="$(cd "${SCRIPTS_DIR}/.." && pwd)"
 DATA_DIR="${APP_DIR}/data"
-LOG="${DATA_DIR}/install.log"
 
+# Marcador inmediato: si esto existe, el hook sí se ejecutó
+date -Iseconds > "${SCRIPTS_DIR}/.install_ran"
+
+# Asegurar data/ y permisos (tu caso: data/ root:root vacío)
 mkdir -p "${DATA_DIR}"
+chown -R umbrel:umbrel "${DATA_DIR}" 2>/dev/null || true
+chmod -R u+rwX "${DATA_DIR}" 2>/dev/null || true
 
-# Marcador inequívoco de que el hook se ejecutó
+# Log persistente en data/
+LOG="${DATA_DIR}/install.log"
 date -Iseconds > "${DATA_DIR}/.install_ran"
 
-# Ejecuta install.js y guarda salida (stdout+stderr) SIEMPRE
-node "$(dirname "$0")/install.js" >> "${LOG}" 2>&1 || {
-  echo "[wrapper] install.js failed, see ${LOG}" >> "${LOG}"
+# Ejecuta la lógica real y captura TODO
+node "${SCRIPTS_DIR}/install.js" >> "${LOG}" 2>&1 || {
+  echo "[wrapper] install.js failed" >> "${LOG}"
   exit 1
 }
