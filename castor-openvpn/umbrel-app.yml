@@ -3,7 +3,7 @@ manifestVersion: 1
 id: castor-openvpn
 category: networking
 name: OpenVPN Hub
-version: "0.1.4"
+version: "0.1.6"
 tagline: OpenVPN TCP 443 exit hub
 description: >
   OpenVPN server over TCP 443 designed for hostile networks.
