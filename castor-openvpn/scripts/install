@@ -1,3 +1,17 @@
 #!/usr/bin/env bash
-set -e
-node "$(dirname "$0")/install.js"
+set -euo pipefail
+
+APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+DATA_DIR="${APP_DIR}/data"
+LOG="${DATA_DIR}/install.log"
+
+mkdir -p "${DATA_DIR}"
+
+# Marcador inequívoco de que el hook se ejecutó
+date -Iseconds > "${DATA_DIR}/.install_ran"
+
+# Ejecuta install.js y guarda salida (stdout+stderr) SIEMPRE
+node "$(dirname "$0")/install.js" >> "${LOG}" 2>&1 || {
+  echo "[wrapper] install.js failed, see ${LOG}" >> "${LOG}"
+  exit 1
+}
